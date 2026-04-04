@@ -7,19 +7,20 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chrispritchard/onit/internal/api"
 	"github.com/chrispritchard/onit/internal/bigtext"
 	"github.com/chrispritchard/onit/internal/terminal"
 )
 
 func main() {
-
 	ba := terminal.BufferedArea{}
 	defer ba.Close()
 
-	render_time_zones(&ba)
+	go api.StartApiServer()()
+	render_display(&ba)
 }
 
-func render_time_zones(ba *terminal.BufferedArea) {
+func render_display(ba *terminal.BufferedArea) {
 	hkt, err := time.LoadLocation("Asia/Hong_Kong")
 	if err != nil {
 		log.Fatal(err)
@@ -37,10 +38,13 @@ func render_time_zones(ba *terminal.BufferedArea) {
 
 	show_colon := true
 	for {
+		message := api.GetDisplayState()
+
 		current := time.Now()
-		to_display := append(
+		to_display := append(append(
 			time_display(current, show_colon),
-			time_display(current.In(hkt), show_colon)...)
+			time_display(current.In(hkt), show_colon)...),
+			message...)
 		ba.Update(to_display)
 
 		time.Sleep(time.Second)
