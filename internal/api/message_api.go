@@ -33,13 +33,19 @@ func StartApiServer() func() {
 	}
 }
 
-func GetDisplayState() []string {
+func GetDisplayState(tick bool) []string {
 	state.mu.RLock()
 	defer state.mu.RUnlock()
 
 	message := []string{}
 	if state.displayText != "" {
 		message = []string{"", state.displayText}
+	}
+
+	if state.alarmTime != nil {
+		// if passed by one min, ignore
+		// if before, display text
+		// if at + 1 min, flash
 	}
 
 	return message

@@ -36,18 +36,18 @@ func render_display(ba *terminal.BufferedArea) {
 		return append([]string{fmt.Sprintf("%s time:", zone)}, big_string...)
 	}
 
-	show_colon := true
+	tick := true
 	for {
-		message := api.GetDisplayState()
+		message := api.GetDisplayState(tick)
 
 		current := time.Now()
 		to_display := append(append(
-			time_display(current, show_colon),
-			time_display(current.In(hkt), show_colon)...),
+			time_display(current, tick),
+			time_display(current.In(hkt), tick)...),
 			message...)
 		ba.Update(to_display)
 
 		time.Sleep(time.Second)
-		show_colon = !show_colon
+		tick = !tick
 	}
 }
