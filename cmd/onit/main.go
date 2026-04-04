@@ -2,6 +2,8 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -40,18 +42,24 @@ func main() {
 	ba := terminal.BufferedArea{}
 	defer ba.Close()
 
+	hkt, err := time.LoadLocation("Asia/Hong_Kong")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	fi := get_font_info()
+	time_display := func(time time.Time, show_colon bool) []string {
+		zone, _ := time.Zone()
+		time_string := get_time_string(time, fi, show_colon)
+		return append([]string{fmt.Sprintf("%s time:", zone)}, time_string...)
+	}
 
 	show_colon := true
 	for {
-		nz_now := time.Now()
-		to_display_nz := get_time_string(nz_now, fi, show_colon)
-		hk_now := nz_now.Add(-5 * time.Hour)
-		to_display_hk := get_time_string(hk_now, fi, show_colon)
-
+		current := time.Now()
 		to_display := append(
-			append([]string{"NZDT time:"}, to_display_nz...),
-			append([]string{"", "HKT time:"}, to_display_hk...)...)
+			time_display(current, show_colon),
+			time_display(current.In(hkt), show_colon)...)
 		ba.Update(to_display)
 
 		time.Sleep(time.Second)
