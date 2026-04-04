@@ -16,6 +16,10 @@ func main() {
 	ba := terminal.BufferedArea{}
 	defer ba.Close()
 
+	render_time_zones(&ba)
+}
+
+func render_time_zones(ba *terminal.BufferedArea) {
 	hkt, err := time.LoadLocation("Asia/Hong_Kong")
 	if err != nil {
 		log.Fatal(err)
