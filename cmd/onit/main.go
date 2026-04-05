@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"log"
+	"slices"
 	"strings"
 	"time"
 
@@ -38,13 +39,15 @@ func render_display(ba *terminal.BufferedArea) {
 
 	tick := true
 	for {
-		message := api.GetDisplayState(tick)
-
 		current := time.Now()
-		to_display := append(append(
+		message := api.GetDisplayState(current, tick)
+
+		to_display := slices.Concat(
+			[]string{fmt.Sprintf("Epoch time: %d", current.Unix())},
 			time_display(current, tick),
-			time_display(current.In(hkt), tick)...),
-			message...)
+			time_display(current.In(hkt), tick),
+			message)
+
 		ba.Update(to_display)
 
 		time.Sleep(time.Second)

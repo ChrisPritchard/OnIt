@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"sync"
 	"time"
@@ -33,7 +34,7 @@ func StartApiServer() func() {
 	}
 }
 
-func GetDisplayState(tick bool) []string {
+func GetDisplayState(currentTime time.Time, tick bool) []string {
 	state.mu.RLock()
 	defer state.mu.RUnlock()
 
@@ -43,9 +44,17 @@ func GetDisplayState(tick bool) []string {
 	}
 
 	if state.alarmTime != nil {
-		// if passed by one min, ignore
-		// if before, display text
-		// if at + 1 min, flash
+		currentUnix := currentTime.Unix()
+		alarmUnix := state.alarmTime.Unix()
+		if currentUnix < alarmUnix+60 {
+			timeSet := fmt.Sprintf("alarm set at %s:", state.alarmTime.Local().Format("03:04 PM"))
+			text := []string{timeSet, " " + state.alarmTitle, " " + state.alarmDesc}
+			if currentUnix >= alarmUnix && tick {
+				text[1] = "*\x1b[7m" + text[1]
+				text[2] = "*" + text[2] + "\x1b[0m"
+			}
+			message = slices.Concat(message, []string{""}, text)
+		}
 	}
 
 	return message
