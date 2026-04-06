@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chrispritchard/onit/internal/api"
 	"github.com/chrispritchard/onit/internal/bigtext"
 	"github.com/chrispritchard/onit/internal/terminal"
 )
@@ -17,11 +16,6 @@ func main() {
 	ba := terminal.BufferedArea{}
 	defer ba.Close()
 
-	go api.StartApiServer()()
-	render_display(&ba)
-}
-
-func render_display(ba *terminal.BufferedArea) {
 	zones := get_zones()
 
 	large_display := func(time time.Time, loc *time.Location, tick bool) []string {
@@ -34,7 +28,15 @@ func render_display(ba *terminal.BufferedArea) {
 	tick := true
 	for {
 		now := time.Now()
-		message := api.GetDisplayState()
+
+		var others strings.Builder
+		for _, z := range []*time.Location{zones.cet, zones.utc, zones.usp, zones.use} {
+			name, display := get_display_time(now, z, tick)
+			fmt.Fprintf(&others, "%s %s\t", display, name)
+		}
+		other_line := others.String()
+
+		date_line := now.Format("Monday, 02 Jan 2006")
 
 		to_display := slices.Concat(
 			newline,
@@ -42,20 +44,16 @@ func render_display(ba *terminal.BufferedArea) {
 			newline,
 			large_display(now, zones.hkt, tick),
 			newline,
-			[]string{fmt.Sprintf("Epoch Time: %d", now.Unix())})
-
-		var others strings.Builder
-		for _, z := range []*time.Location{zones.cet, zones.utc, zones.usp, zones.use} {
-			name, display := get_display_time(now, z, tick)
-			fmt.Fprintf(&others, "%s: %s\t", name, display)
-		}
-
-		to_display = slices.Concat(
-			to_display,
-			[]string{others.String()},
-			newline,
-			[]string{now.Format("Monday, 02 Jan 2006")},
-			message)
+			[]string{
+				fmt.Sprintf("Epoch Time: %d", now.Unix()),
+				"",
+				"\x1b#3" + other_line,
+				"\x1b#4" + other_line,
+				"\x1b#5",
+				"\x1b#3" + date_line,
+				"\x1b#4" + date_line,
+				"\x1b#5",
+			})
 
 		ba.Update(to_display)
 
