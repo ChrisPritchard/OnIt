@@ -28,16 +28,6 @@ func main() {
 	tick := true
 	for {
 		now := time.Now()
-
-		var others strings.Builder
-		for _, z := range []*time.Location{zones.cet, zones.utc, zones.usp, zones.use} {
-			name, display := get_display_time(now, z, tick)
-			fmt.Fprintf(&others, "%s %s\t", display, name)
-		}
-		other_line := others.String()
-
-		date_line := now.Format("Monday, 02 Jan 2006")
-
 		to_display := slices.Concat(
 			newline,
 			large_display(now, zones.nzt, tick),
@@ -47,12 +37,10 @@ func main() {
 			[]string{
 				fmt.Sprintf("Epoch Time: %d", now.Unix()),
 				"",
-				"\x1b#3" + other_line,
-				"\x1b#4" + other_line,
-				"\x1b#5",
-				"\x1b#3" + date_line,
-				"\x1b#4" + date_line,
-				"\x1b#5",
+				"UTC\t\t" + get_combined_time(now, zones.utc, tick) + "\t\t\t\t" + "US East\t\t" + get_combined_time(now, zones.use, tick),
+				"Central Europe\t" + get_combined_time(now, zones.cet, tick) + "\t\t\t\t" + "US West\t\t" + get_combined_time(now, zones.usp, tick),
+				"",
+				now.Format("Monday, 02 Jan 2006"),
 			})
 
 		ba.Update(to_display)
@@ -70,6 +58,11 @@ func get_display_time(time time.Time, loc *time.Location, tick bool) (zone strin
 		display = strings.Replace(display, ":", " ", 1)
 	}
 	return
+}
+
+func get_combined_time(time time.Time, loc *time.Location, tick bool) string {
+	name, display := get_display_time(time, loc, tick)
+	return fmt.Sprintf("%s %s", display, name)
 }
 
 type zones struct {
