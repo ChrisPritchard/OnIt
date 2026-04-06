@@ -2,8 +2,6 @@ package terminal
 
 import (
 	"fmt"
-	"math"
-	"strings"
 )
 
 const (
@@ -60,46 +58,4 @@ func (ba *BufferedArea) Update(lines []string) {
 
 func (ba *BufferedArea) Close() {
 	fmt.Print(cursorShow)
-}
-
-func ProgressBar(current, max, line_length int, suffix string) (string, error) {
-	if current < 0 {
-		return "", fmt.Errorf("current can not be less than 0")
-	}
-	if max < 0 {
-		return "", fmt.Errorf("max can not be less than 0")
-	}
-	if current > max {
-		return "", fmt.Errorf("current must be less than or equal to max")
-	}
-
-	required_suffix := len(suffix)
-	if required_suffix != 0 {
-		required_suffix++ // space gap
-	}
-	available := line_length - required_suffix
-	if available < 3 { // '[ ]' is the smallest bar
-		return "", fmt.Errorf("line_length is not sufficient to present the progress bar")
-	}
-
-	segments := available - 2
-	progress_per_segment := max / segments
-	current_progress := int(math.Ceil(float64(current) / float64(progress_per_segment)))
-
-	var line strings.Builder
-	line.WriteString("[")
-
-	for range current_progress {
-		line.WriteString("▓")
-	}
-	for range segments - current_progress {
-		line.WriteString(" ")
-	}
-	line.WriteString("]")
-
-	if len(suffix) > 0 {
-		line.WriteString(" " + suffix)
-	}
-
-	return line.String(), nil
 }
