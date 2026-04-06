@@ -10,8 +10,6 @@ const (
 	escape         = "\x1b"
 	cursorNextLine = escape + "[1E"
 	cursorPrevLine = escape + "[1F"
-	cursorToCol    = escape + "[%dG" // 1 based
-	clearToEnd     = escape + "[0K"
 	clearLine      = escape + "[2K"
 	cursorHide     = escape + "[?25l"
 	cursorShow     = escape + "[?25h"
@@ -44,31 +42,11 @@ func (ba *BufferedArea) Update(lines []string) {
 	for i, l := range lines {
 		if i >= len(ba.last) {
 			fmt.Println(l)
-			continue
-		}
-
-		if l == ba.last[i] {
+		} else if l == ba.last[i] {
 			fmt.Printf(cursorNextLine)
-			continue
+		} else {
+			fmt.Println(l)
 		}
-
-		currentRunes := []rune(l)
-		lastRunes := []rune(ba.last[i])
-
-		for j, c := range currentRunes {
-			if j < len(lastRunes) && lastRunes[j] == c {
-				continue
-			}
-			fmt.Printf(cursorToCol, j+1)
-			fmt.Printf("%c", c)
-		}
-
-		if len(currentRunes) < len(lastRunes) {
-			fmt.Printf(cursorToCol, len(currentRunes)+1)
-			fmt.Print(clearToEnd)
-		}
-
-		fmt.Printf(cursorNextLine)
 	}
 
 	if len(lines) < len(ba.last) {
