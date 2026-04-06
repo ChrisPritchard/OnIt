@@ -67,7 +67,7 @@ func render_display(ba *terminal.BufferedArea) {
 func get_display_time(time time.Time, loc *time.Location, tick bool) (zone string, display string) {
 	rel := time.In(loc)
 	zone, _ = rel.Zone()
-	display = time.Format("03:04 PM")
+	display = rel.Format("03:04 PM")
 	if !tick {
 		display = strings.Replace(display, ":", " ", 1)
 	}
