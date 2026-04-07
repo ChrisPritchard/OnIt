@@ -39,6 +39,7 @@ func main() {
 				"",
 				"UTC\t\t" + get_combined_time(now, zones.utc, tick) + "\t\t\t\t" + "US East\t\t" + get_combined_time(now, zones.use, tick),
 				"Central Europe\t" + get_combined_time(now, zones.cet, tick) + "\t\t\t\t" + "US West\t\t" + get_combined_time(now, zones.usp, tick),
+				"Tokyo\t\t" + get_combined_time(now, zones.jpn, tick) + "\t\t\t\t" + "Brazil SP\t" + get_combined_time(now, zones.brz, tick),
 				"",
 				now.Format("Monday, 02 Jan 2006"),
 			})
@@ -72,6 +73,8 @@ type zones struct {
 	utc *time.Location
 	usp *time.Location
 	use *time.Location
+	jpn *time.Location
+	brz *time.Location
 }
 
 func get_zones() zones {
@@ -90,5 +93,7 @@ func get_zones() zones {
 		utc: load_loc("Europe/London"),
 		usp: load_loc("America/Los_Angeles"),
 		use: load_loc("America/New_York"),
+		jpn: load_loc("Asia/Tokyo"),
+		brz: load_loc("America/Sao_Paulo"),
 	}
 }
