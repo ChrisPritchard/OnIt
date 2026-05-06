@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"strings"
 
 	"image"
 	"image/color"
@@ -50,34 +51,47 @@ func main() {
 		}
 
 		now := time.Now()
+		trimlead := func(disp string) string {
+			if disp[0] == '0' {
+				return " " + disp[1:]
+			}
+			return disp
+		}
+		tdisp := func(loc *time.Location) string {
+			disp := zonetimes.GetTimeWithLoc(now, loc, tick)
+			if loc == zones.BRZ {
+				disp = strings.Replace(disp, "-03", "BRZ", 1)
+			}
+			return trimlead(disp)
+		}
 
 		zone, time_string := zonetimes.GetDisplayTime(now, zones.NZT, tick)
 		medium_font.DrawString(zone+" time:", cursor)
 		drop(80)
-		large_font.DrawString(time_string, cursor)
+		large_font.DrawString(trimlead(time_string), cursor)
 
 		drop(90)
 
 		zone, time_string = zonetimes.GetDisplayTime(now, zones.HKT, tick)
 		medium_font.DrawString(zone+" time:", cursor)
 		drop(80)
-		large_font.DrawString(time_string, cursor)
+		large_font.DrawString(trimlead(time_string), cursor)
 
 		drop(90)
 
 		medium_font.DrawString(fmt.Sprintf("Epoch time: %d", now.Unix()), cursor)
 		drop(60)
-		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.UTC, tick), cursor)
+		medium_font.DrawString(tdisp(zones.CET), cursor)
 		drop(60)
-		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.CET, tick), cursor)
+		medium_font.DrawString(tdisp(zones.JPN), cursor)
 		drop(60)
-		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.USE, tick), cursor)
+		medium_font.DrawString(tdisp(zones.UTC), cursor)
 		drop(60)
-		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.USP, tick), cursor)
+		medium_font.DrawString(tdisp(zones.USP), cursor)
 		drop(60)
-		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.BRZ, tick), cursor)
+		medium_font.DrawString(tdisp(zones.USE), cursor)
 		drop(60)
-		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.JPN, tick), cursor)
+		medium_font.DrawString(tdisp(zones.BRZ), cursor)
 		drop(60)
 
 		rotated := rotate90Clockwise(img)
