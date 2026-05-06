@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"fmt"
 
 	"image"
 	"image/color"
@@ -33,7 +34,7 @@ func main() {
 
 	img := image.NewRGBA(image.Rect(0, 0, display.Height(), display.Width())) // rotated dims
 
-	medium_font := get_font(font_face, 48, color.White, img)
+	medium_font := get_font(font_face, 32, color.White, img)
 	large_font := get_font(font_face, 72, color.White, img)
 
 	zones := zonetimes.GetZones()
@@ -43,16 +44,41 @@ func main() {
 		background := color.RGBA{R: 20, G: 20, B: 20, A: 255}
 		draw.Draw(img, img.Bounds(), image.NewUniform(background), image.Point{}, draw.Src)
 
-		cursor := freetype.Pt(20, 80)
+		cursor := freetype.Pt(20, 40)
 		drop := func(y int) {
 			cursor = cursor.Add(freetype.Pt(0, y))
 		}
 
 		now := time.Now()
+
 		zone, time_string := zonetimes.GetDisplayTime(now, zones.NZT, tick)
 		medium_font.DrawString(zone+" time:", cursor)
 		drop(80)
 		large_font.DrawString(time_string, cursor)
+
+		drop(90)
+
+		zone, time_string = zonetimes.GetDisplayTime(now, zones.HKT, tick)
+		medium_font.DrawString(zone+" time:", cursor)
+		drop(80)
+		large_font.DrawString(time_string, cursor)
+
+		drop(90)
+
+		medium_font.DrawString(fmt.Sprintf("Epoch time: %d", now.Unix()), cursor)
+		drop(60)
+		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.UTC, tick), cursor)
+		drop(60)
+		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.CET, tick), cursor)
+		drop(60)
+		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.USE, tick), cursor)
+		drop(60)
+		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.USP, tick), cursor)
+		drop(60)
+		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.BRZ, tick), cursor)
+		drop(60)
+		medium_font.DrawString(zonetimes.GetTimeWithLoc(now, zones.JPN, tick), cursor)
+		drop(60)
 
 		rotated := rotate90Clockwise(img)
 		display.Blit(rotated)
