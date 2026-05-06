@@ -4,3 +4,4 @@ run:
 
 build:
 	go build -o onit ./cmd/onit
+
